@@ -8,11 +8,16 @@
 </head>
 <body>
 
-    <div id="menu-view" class="view active-view">
+   <div id="menu-view" class="view active-view">
         <h1>Thermodynamics Study Space</h1>
         <p>Select a study mode:</p>
         <button onclick="startFlashcards()">🗂️ Flashcards Mode</button>
         <button onclick="startMatching()">🔗 Matching Mode</button>
+        
+        <div style="margin-top: 30px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+            <button onclick="resetFlashcards()" style="background-color: #ff9aa2; font-size: 14px;">🗑️ Reset Flashcards</button>
+            <button onclick="resetMatching()" style="background-color: #ffdac1; font-size: 14px;">🔄 Reset Matching</button>
+        </div>
     </div>
 
     <div id="flashcards-view" class="view">
@@ -54,6 +59,7 @@
         </div>
     </div>
 
+    
     <script src="app.js"></script>
 </body>
 </html>

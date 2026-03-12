@@ -73,8 +73,19 @@ let deck = [];
 let currentCard = null;
 
 function startFlashcards() {
-    // Restauramos el mazo completo y lo MEZCLAMOS de forma aleatoria
-    deck = [...baseData].sort(() => 0.5 - Math.random()); 
+    // 1. Intentamos cargar el mazo guardado
+    const savedDeck = localStorage.getItem('thermoDeck');
+
+    if (savedDeck) {
+        deck = JSON.parse(savedDeck);
+        // Si el usuario ya había terminado todas las cartas, le reiniciamos el mazo
+        if (deck.length === 0) {
+            deck = [...baseData].sort(() => 0.5 - Math.random());
+        }
+    } else {
+        // Primera vez: creamos el mazo y lo mezclamos
+        deck = [...baseData].sort(() => 0.5 - Math.random());
+    }
     
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
     document.getElementById('flashcards-view').classList.add('active-view');
@@ -85,7 +96,6 @@ function nextCard() {
     const flashcardElement = document.getElementById('flashcard');
     flashcardElement.classList.remove('is-flipped');
     
-    // Ocultar controles hasta que la carta gire
     document.getElementById('fc-controls').style.display = 'none';
     document.getElementById('fc-long-answer').style.display = 'none';
     document.getElementById('btn-show-more').style.display = 'inline-block';
@@ -100,7 +110,6 @@ function nextCard() {
 
     currentCard = deck.shift();
     
-    // Un pequeño retraso para que la carta se actualice cuando esté boca abajo
     setTimeout(() => {
         document.getElementById('fc-question').innerText = currentCard.q;
         document.getElementById('fc-short-answer').innerText = currentCard.shortA;
@@ -110,11 +119,8 @@ function nextCard() {
 
 function flipCard() {
     const flashcard = document.getElementById('flashcard');
-    
-    // 'toggle' pone la clase si no está, y la quita si ya está (voltea y desvoltea)
     flashcard.classList.toggle('is-flipped');
     
-    // Mostramos los botones de calificación cuando la tarjeta se voltea hacia la respuesta
     if (flashcard.classList.contains('is-flipped')) {
         setTimeout(() => {
             document.getElementById('fc-controls').style.display = 'flex';
@@ -130,16 +136,31 @@ function toggleLongAnswer(e) {
 
 function rateCard(rating) {
     if (rating === 'aprendido') {
-        // Se descarta, no se vuelve a meter
+        // Se descarta
     } else if (rating === 'repasar') {
-        // Al final del mazo
         deck.push(currentCard);
     } else if (rating === 'nosabia') {
-        // Se repite con mucha frecuencia (se inserta en la posición 2 o 3)
         const insertIndex = Math.min(2, deck.length); 
         deck.splice(insertIndex, 0, currentCard);
     }
+    
+    // GUARDAMOS EL PROGRESO
+    localStorage.setItem('thermoDeck', JSON.stringify(deck));
     nextCard();
+}
+
+function resetFlashcards() {
+    if(confirm("Are you sure you want to reset your Flashcards progress? All 60 cards will return.")) {
+        localStorage.removeItem('thermoDeck');
+        alert("Flashcards progress reset successfully!");
+    }
+}
+
+function resetMatching() {
+    if(confirm("Are you sure you want to reset your Matching progress? All 60 concepts will return.")) {
+        localStorage.removeItem('thermoMatchPool');
+        alert("Matching progress reset successfully!");
+    }
 }
 
 /* --- LÓGICA DE EMPAREJAR --- */
@@ -147,20 +168,30 @@ let matchAttempts = 0;
 let selectedConcept = null;
 let selectedDef = null;
 let matchesFound = 0;
-let matchingPool = []; // Aquí guardaremos las preguntas que faltan por salir
+let matchingPool = []; 
 let currentRoundTarget = 5;
 
 function startMatching() {
     matchAttempts = 0;
-    document.getElementById('match-attempts').innerText = `Intentos fallidos: 0`;
+    document.getElementById('match-attempts').innerText = `Failed attempts: 0`;
     
-    // 1. Tomamos TODAS las preguntas y las desordenamos aleatoriamente
-    matchingPool = [...baseData].sort(() => 0.5 - Math.random());
+    // 1. Intentamos cargar el pool guardado en el navegador
+    const savedPool = localStorage.getItem('thermoMatchPool');
+
+    if (savedPool) {
+        matchingPool = JSON.parse(savedPool);
+        // Si el usuario ya había terminado todas las preguntas, le reiniciamos el juego
+        if (matchingPool.length === 0) {
+            matchingPool = [...baseData].sort(() => 0.5 - Math.random());
+        }
+    } else {
+        // Primera vez: creamos el pool completo y lo mezclamos
+        matchingPool = [...baseData].sort(() => 0.5 - Math.random());
+    }
     
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
     document.getElementById('matching-view').classList.add('active-view');
 
-    // Iniciamos la primera ronda de 5
     loadMatchRound();
 }
 
@@ -170,35 +201,31 @@ function loadMatchRound() {
     selectedDef = null;
 
     const grid = document.querySelector('.matching-grid');
-    grid.style.display = ''; // Restauramos la cuadrícula por si estaba oculta
+    grid.style.display = ''; 
     
-    // 2. Verificamos si ya no quedan preguntas
     if (matchingPool.length === 0) {
-        grid.style.display = 'block'; // Cambiamos el diseño temporalmente
+        grid.style.display = 'block'; 
         grid.innerHTML = `
             <div style="text-align: center; padding: 40px; background-color: var(--card-bg); border-radius: 15px; box-shadow: var(--shadow);">
-                <h3 style="color: var(--text-color);">¡Fueron todas las preguntas! 🎉</h3>
-                <p>Has repasado exitosamente los ${baseData.length} conceptos.</p>
-                <p style="color: #ff7675;">Intentos fallidos totales: ${matchAttempts}</p>
-                <button onclick="startMatching()" class="btn-success">🔄 Reiniciar Juego</button>
-                <button onclick="showMenu()">🏠 Salir al Menú</button>
+                <h3 style="color: var(--text-color);">All questions completed! 🎉</h3>
+                <p>You have successfully reviewed all ${baseData.length} concepts.</p>
+                <p style="color: #ff7675;">Total failed attempts: ${matchAttempts}</p>
+                <button onclick="startMatching()" class="btn-success">🔄 Restart Game</button>
+                <button onclick="showMenu()">🏠 Back to Menu</button>
             </div>
         `;
         return;
     }
 
-    // 3. Sacamos hasta 5 preguntas de la piscina (si quedan menos de 5, saca las que queden)
     let gameSet = matchingPool.splice(0, 5);
     currentRoundTarget = gameSet.length;
 
     let concepts = gameSet.map(item => ({ id: item.id, text: item.q }));
     let definitions = gameSet.map(item => ({ id: item.id, text: item.shortA }));
 
-    // Mezclamos las columnas de forma independiente
     concepts.sort(() => 0.5 - Math.random());
     definitions.sort(() => 0.5 - Math.random());
 
-    // Reconstruimos las dos columnas
     grid.innerHTML = `
         <div class="match-column" id="match-concepts"></div>
         <div class="match-column" id="match-definitions"></div>
@@ -254,27 +281,27 @@ function checkMatch() {
     const el2 = selectedDef.element;
 
     if (isMatch) {
-        // MATCH CORRECTO
         setTimeout(() => {
             el1.classList.add('hidden');
             el2.classList.add('hidden');
         }, 300);
         matchesFound++;
         
-        // Si ya encontró todos los de esta ronda
         if (matchesFound === currentRoundTarget) {
+            // ¡NUEVO!: GUARDAMOS EL PROGRESO AL COMPLETAR LA RONDA
+            localStorage.setItem('thermoMatchPool', JSON.stringify(matchingPool));
+
             setTimeout(() => {
                 if (matchingPool.length > 0) {
-                    showRoundComplete(); // Muestra el botón para seguir practicando
+                    showRoundComplete(); 
                 } else {
-                    loadMatchRound(); // Ya no hay más, mostrará el mensaje final
+                    loadMatchRound(); 
                 }
             }, 500);
         }
     } else {
-        // MATCH INCORRECTO
         matchAttempts++;
-        document.getElementById('match-attempts').innerText = `Intentos fallidos: ${matchAttempts}`;
+        document.getElementById('match-attempts').innerText = `Failed attempts: ${matchAttempts}`;
         
         el1.classList.add('error');
         el2.classList.add('error');
@@ -285,7 +312,6 @@ function checkMatch() {
         }, 1000);
     }
 
-    // Reiniciamos selección
     el1.classList.remove('selected');
     el2.classList.remove('selected');
     selectedConcept = null;
@@ -296,13 +322,12 @@ function showRoundComplete() {
     const grid = document.querySelector('.matching-grid');
     grid.style.display = 'block'; 
     
-    // Inyectamos los botones de descanso
     grid.innerHTML = `
         <div style="text-align: center; padding: 40px; background-color: var(--card-bg); border-radius: 15px; box-shadow: var(--shadow);">
-            <h3 style="color: var(--text-color);">¡Excelente! Has completado esta ronda. ✅</h3>
-            <p>Preguntas restantes: <strong>${matchingPool.length}</strong></p>
-            <button onclick="loadMatchRound()" class="btn-success" style="margin-top: 20px;">▶️ Practicar otros 5</button>
-            <button onclick="showMenu()">🏠 Salir al Menú</button>
+            <h3 style="color: var(--text-color);">Excellent! Round completed. ✅</h3>
+            <p>Remaining concepts: <strong>${matchingPool.length}</strong></p>
+            <button onclick="loadMatchRound()" class="btn-success" style="margin-top: 20px;">▶️ Practice next 5</button>
+            <button onclick="showMenu()">🏠 Back to Menu</button>
         </div>
     `;
 }
