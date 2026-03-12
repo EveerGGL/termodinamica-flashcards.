@@ -1,0 +1,117 @@
+/* --- ESTILOS CSS (Minimalista y Pastel) --- */
+:root {
+    --bg-color: #fbf9f1; /* Blanco hueso/pastel muy suave */
+    --text-color: #5c5c5c; /* Gris oscuro para lectura cómoda */
+    --primary: #aadce0; /* Azul pastel */
+    --primary-hover: #92cbd1;
+    --success: #b5ead7; /* Verde pastel */
+    --warning: #ffdac1; /* Naranja/Amarillo pastel */
+    --danger: #ff9aa2;  /* Rojo/Rosa pastel */
+    --card-bg: #ffffff;
+    --shadow: 0 8px 16px rgba(0,0,0,0.05);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+h1, h2 { text-align: center; color: #7a7a7a; }
+
+button {
+    background-color: var(--primary);
+    color: #555;
+    border: none;
+    padding: 12px 24px;
+    margin: 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: transform 0.2s, background-color 0.2s;
+    box-shadow: var(--shadow);
+}
+button:hover { transform: translateY(-2px); background-color: var(--primary-hover); }
+
+.btn-success { background-color: var(--success); }
+.btn-warning { background-color: var(--warning); }
+.btn-danger { background-color: var(--danger); }
+.btn-back { background-color: #e2e2e2; padding: 8px 16px; font-size: 14px; }
+.btn-back:hover { background-color: #d1d1d1; }
+
+/* Vistas */
+.view { display: none; width: 100%; max-width: 800px; flex-direction: column; align-items: center; }
+.active-view { display: flex; }
+
+/* --- FLASHCARDS --- */
+.flashcard-container {
+    width: 100%; max-width: 500px; height: 350px;
+    perspective: 1000px; margin: 30px 0;
+}
+.flashcard {
+    width: 100%; height: 100%;
+    position: relative;
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+.flashcard.is-flipped { transform: rotateY(180deg); }
+
+.card-face {
+    width: 100%; height: 100%;
+    position: absolute;
+    backface-visibility: hidden;
+    background-color: var(--card-bg);
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 30px; box-sizing: border-box; text-align: center;
+}
+.card-back {
+    transform: rotateY(180deg);
+    overflow-y: auto;
+    justify-content: flex-start;
+}
+
+.click-hint { font-size: 12px; color: #aaa; margin-top: 20px; }
+#btn-show-more { font-size: 12px; padding: 6px 12px; margin-top: 15px; }
+.long-answer { 
+    display: none; margin-top: 15px; font-size: 15px; 
+    color: #666; border-top: 1px solid #eee; 
+    padding-top: 15px; text-align: left; line-height: 1.5;
+}
+
+.options-container { display: none; justify-content: center; gap: 10px; width: 100%; flex-wrap: wrap; margin-top: 10px;}
+
+/* --- JUEGO DE EMPAREJAR --- */
+.matching-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 20px; width: 100%; margin-top: 20px;
+}
+.match-column { display: flex; flex-direction: column; gap: 15px; }
+.match-item {
+    background-color: var(--card-bg);
+    padding: 15px; border-radius: 10px;
+    box-shadow: var(--shadow); cursor: pointer;
+    text-align: center; transition: all 0.3s;
+    border: 2px solid transparent; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 60px;
+}
+.match-item.selected { border-color: #88c9d0; transform: scale(1.02); background-color: #f0fbfc; }
+.match-item.error { background-color: var(--danger); color: white; border-color: var(--danger); }
+.match-item.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
+
+.header-bar { 
+    width: 100%; display: flex; justify-content: space-between; 
+    align-items: center; margin-bottom: 20px;
+    font-weight: bold; color: #777;
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermodynamics Flashcards</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="menu-view" class="view active-view">
+        <h1>Thermodynamics Study Space</h1>
+        <p>Select a study mode:</p>
+        <button onclick="startFlashcards()">🗂️ Flashcards Mode</button>
+        <button onclick="startMatching()">🔗 Matching Mode</button>
+    </div>
+
+    <div id="flashcards-view" class="view">
+        <div class="header-bar">
+            <button class="btn-back" onclick="showMenu()">← Back to Menu</button>
+            <span id="fc-counter">Cards remaining: 0</span>
+        </div>
+        
+        <div class="flashcard-container" onclick="flipCard()">
+            <div class="flashcard" id="flashcard">
+                <div class="card-face card-front">
+                    <h2 id="fc-question">Question</h2>
+                    <p class="click-hint">(Click to flip)</p>
+                </div>
+                <div class="card-face card-back">
+                    <h3 id="fc-short-answer">Short Answer</h3>
+                    <button id="btn-show-more" onclick="toggleLongAnswer(event)">View details</button>
+                    <div id="fc-long-answer" class="long-answer">Long Answer</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="options-container" id="fc-controls">
+            <button class="btn-danger" onclick="rateCard('nosabia')">Didn't know</button>
+            <button class="btn-warning" onclick="rateCard('repasar')">Needs review</button>
+            <button class="btn-success" onclick="rateCard('aprendido')">Learned</button>
+        </div>
+    </div>
+
+    <div id="matching-view" class="view">
+        <div class="header-bar">
+            <button class="btn-back" onclick="showMenu()">← Back to Menu</button>
+            <span id="match-attempts">Failed attempts: 0</span>
+        </div>
+        <h2>Match the concept with its definition</h2>
+        <div class="matching-grid">
+            <div class="match-column" id="match-concepts"></div>
+            <div class="match-column" id="match-definitions"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
